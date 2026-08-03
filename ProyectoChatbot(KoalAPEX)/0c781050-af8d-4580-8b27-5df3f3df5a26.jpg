@@ -1,0 +1,25 @@
+<h1> Documentacion </h1>
+
+<h4> Tabla de Contenidos </h4>
+
+1. [Diagramas generados](#diagramas-generados)
+    - [Diagrama de entidad relación](#diagrama-de-entidad-relacion)
+    - [Diagrama de arquitectura del proyecto](#diagrama-de-arquitectura-del-proyecto)
+
+
+<h2> Diagramas generados </h2>
+
+<h3> Diagrama de entidad relacion </h3>
+
+A continuacion se muestra una fotografia ilustrativa de nuestro diagrama entidad relacion
+
+![Fotografia ilustrativa del diagrama Entidad Relacion](miscelaneous/img/diagramaERBD.png)
+
+<h4>Script para generar la base de datos del proyecto</h4>
+
+*<h5><a href="miscelaneous/ATP SQL DDL.ipynb" target="_blank">Enlace al documento SQL</a></h5>*
+
+<h3> Diagrama de arquitectura del proyecto </h3>
+
+
+

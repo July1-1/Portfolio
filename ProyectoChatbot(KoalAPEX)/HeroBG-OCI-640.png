@@ -1,0 +1,1719 @@
+{
+    "cells": [
+        {
+            "attachments": {},
+            "cell_type": "markdown",
+            "metadata": {
+                "azdata_cell_guid": "938a83d6-ce43-4722-890d-3333ec9cb9ee"
+            },
+            "source": [
+                "# **Atp Sql de la base de datos**\n",
+                "\n",
+                "## **Script Base:**\n",
+                "\n",
+                "A continuación se muestra una base **SIN REGISTROS** de la base de datos. Se incluyen las tablas \n"
+            ]
+        },
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "### <span style=\"font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: var(--vscode-foreground);\"><b>Tabla Usuarios</b></span>"
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": null,
+            "metadata": {
+                "azdata_cell_guid": "710c11ad-40f1-4611-962e-f5962f02a2fa",
+                "language": "sql",
+                "tags": [
+                    "hide_input"
+                ]
+            },
+            "outputs": [],
+            "source": [
+                "-- Crear la tabla Usuarios\n",
+                "CREATE TABLE Usuarios (\n",
+                "    idUsuario NUMBER PRIMARY KEY,\n",
+                "    Nombre VARCHAR2(100) NOT NULL,\n",
+                "    Correo VARCHAR2(100) NOT NULL,\n",
+                "    TokenChannel VARCHAR2(100) NULL,\n",
+                "    Telefono VARCHAR2(100) NOT NULL,\n",
+                "    UsuarioT VARCHAR2(100) NULL,\n",
+                "    Activo NUMBER(1) DEFAULT 1 CHECK (Activo IN (0,1))\n",
+                ");\n",
+                "\n",
+                "-- Secuencia de Auto Incremento \n",
+                "CREATE SEQUENCE Usuarios_seq START WITH 1 INCREMENT BY 1;\n",
+                "CREATE OR REPLACE TRIGGER Usuarios2_trg\n",
+                "BEFORE INSERT ON Usuarios\n",
+                "FOR EACH ROW\n",
+                "BEGIN\n",
+                "    IF :NEW.idUsuario IS NULL THEN\n",
+                "        SELECT Usuarios_seq.NEXTVAL INTO :NEW.idUsuario FROM DUAL;\n",
+                "    END IF;\n",
+                "END;\n",
+                "/"
+            ]
+        },
+        {
+            "attachments": {},
+            "cell_type": "markdown",
+            "metadata": {
+                "azdata_cell_guid": "a93d5dde-dab5-4588-9fc8-b380a2b1be8c"
+            },
+            "source": [
+                "### **Tabla Manager**"
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": null,
+            "metadata": {
+                "azdata_cell_guid": "79532972-94a4-4f3c-87e5-722cba5c665e",
+                "language": "sql",
+                "tags": [
+                    "hide_input"
+                ]
+            },
+            "outputs": [],
+            "source": [
+                "CREATE TABLE TODOUSER.Manager (\n",
+                "    idManage NUMBER PRIMARY KEY,\n",
+                "    idUsuario NUMBER NULL,\n",
+                "    Activo NUMBER(1) DEFAULT 1 CHECK (Activo IN (0,1)),\n",
+                "    CONSTRAINT fk_Manager_Usuario FOREIGN KEY (idUsuario) REFERENCES TODOUSER.Usuarios(idUsuario)\n",
+                ");\n",
+                "\n",
+                "-- Secuencia de Auto Incremento \n",
+                "CREATE SEQUENCE TODOUSER.Manager_seq START WITH 1 INCREMENT BY 1;\n",
+                "\n",
+                "-- Trigger para auto incremento de idManage\n",
+                "CREATE OR REPLACE TRIGGER TODOUSER.Manager_trg\n",
+                "BEFORE INSERT ON TODOUSER.Manager\n",
+                "FOR EACH ROW\n",
+                "BEGIN\n",
+                "    IF :NEW.idManage IS NULL THEN\n",
+                "        SELECT Manager_seq.NEXTVAL INTO :NEW.idManage FROM DUAL;\n",
+                "    END IF;\n",
+                "END;\n",
+                "/"
+            ]
+        },
+        {
+            "attachments": {},
+            "cell_type": "markdown",
+            "metadata": {
+                "azdata_cell_guid": "92bc8461-9ee4-4633-987f-b67d4f54698c",
+                "language": "sql"
+            },
+            "source": [
+                "### **Tabla Equipo**"
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": null,
+            "metadata": {
+                "azdata_cell_guid": "1488a742-309b-4880-90f7-1b7c97732e7b",
+                "language": "sql",
+                "tags": [
+                    "hide_input"
+                ]
+            },
+            "outputs": [],
+            "source": [
+                "-- Crear la tabla Equipo\n",
+                "CREATE TABLE TODOUSER.Equipo (\n",
+                "    idEquipo NUMBER PRIMARY KEY,\n",
+                "    Nombre VARCHAR2(100) NOT NULL,\n",
+                "    Notificacion TIMESTAMP NULL,\n",
+                "    Activo NUMBER(1) DEFAULT 1 CHECK (Activo IN (0,1))\n",
+                ");\n",
+                "\n",
+                "-- Secuencia de Auto Incremento\n",
+                "CREATE SEQUENCE TODOUSER.Equipo_seq START WITH 1 INCREMENT BY 1;\n",
+                "CREATE OR REPLACE TRIGGER TODOUSER.Equipo_trg\n",
+                "BEFORE INSERT ON TODOUSER.Equipo\n",
+                "FOR EACH ROW\n",
+                "BEGIN\n",
+                "    IF :NEW.idEquipo IS NULL THEN\n",
+                "        SELECT TODOUSER.Equipo_seq.NEXTVAL INTO :NEW.idEquipo FROM DUAL;\n",
+                "    END IF;\n",
+                "END;\n",
+                "/"
+            ]
+        },
+        {
+            "attachments": {},
+            "cell_type": "markdown",
+            "metadata": {
+                "azdata_cell_guid": "e9535152-cfb9-40a7-9dfb-2970730b1209",
+                "language": "sql"
+            },
+            "source": [
+                "### **Tabla Proyecto**"
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": null,
+            "metadata": {
+                "azdata_cell_guid": "591f638b-0b33-4ec3-8831-d8d5a6e2811e",
+                "language": "sql",
+                "tags": [
+                    "hide_input"
+                ]
+            },
+            "outputs": [],
+            "source": [
+                "-- Crear la tabla Proyecto\n",
+                "CREATE TABLE TODOUSER.Proyecto (\n",
+                "    idProyecto NUMBER PRIMARY KEY,\n",
+                "    Nombre VARCHAR2(100) NOT NULL,\n",
+                "    FechaCreacion DATE NULL,\n",
+                "    Descripcion CLOB NULL,\n",
+                "    Activo NUMBER(1) DEFAULT 1 CHECK (Activo IN (0,1))\n",
+                ");\n",
+                "\n",
+                "CREATE SEQUENCE TODOUSER.Proyecto_seq START WITH 1 INCREMENT BY 1;\n",
+                "CREATE OR REPLACE TRIGGER Proyecto_trg\n",
+                "BEFORE INSERT ON TODOUSER.Proyecto\n",
+                "FOR EACH ROW\n",
+                "BEGIN\n",
+                "    IF :NEW.idProyecto IS NULL THEN\n",
+                "        SELECT TODOUSER.Proyecto_seq.NEXTVAL INTO :NEW.idProyecto FROM DUAL;\n",
+                "    END IF;\n",
+                "END;"
+            ]
+        },
+        {
+            "attachments": {},
+            "cell_type": "markdown",
+            "metadata": {
+                "azdata_cell_guid": "1ddd92d4-0965-43df-8f27-83e46553c518",
+                "language": "sql"
+            },
+            "source": [
+                "### **Tabla Sprint**"
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": null,
+            "metadata": {
+                "azdata_cell_guid": "bc7cb2d1-afae-4661-ac20-461165898861",
+                "language": "sql",
+                "tags": [
+                    "hide_input"
+                ]
+            },
+            "outputs": [],
+            "source": [
+                "-- Crear la tabla Sprint\n",
+                "CREATE TABLE TODOUSER.Sprint (\n",
+                "    idSprint NUMBER PRIMARY KEY,\n",
+                "    idProyecto NUMBER NULL,\n",
+                "    FechaInicio TIMESTAMP NOT NULL,\n",
+                "    FechaFin TIMESTAMP NULL,\n",
+                "    Nombre VARCHAR2(100) DEFAULT 'SprintProyecto',\n",
+                "    Activo NUMBER(1) DEFAULT 1 CHECK (Activo IN (0,1)),\n",
+                "    CONSTRAINT fk_Sprint_Proyecto FOREIGN KEY (idProyecto) REFERENCES TODOUSER.Proyecto(idProyecto)\n",
+                ");\n",
+                "\n",
+                "CREATE SEQUENCE TODOUSER.Sprint_seq START WITH 1 INCREMENT BY 1;\n",
+                "CREATE OR REPLACE TRIGGER TODOUSER.Sprint_trg\n",
+                "BEFORE INSERT ON TODOUSER.Sprint\n",
+                "FOR EACH ROW\n",
+                "BEGIN\n",
+                "    IF :NEW.idSprint IS NULL THEN\n",
+                "        SELECT Sprint_seq.NEXTVAL INTO :NEW.idSprint FROM DUAL;\n",
+                "    END IF;\n",
+                "END;\n",
+                "/"
+            ]
+        },
+        {
+            "attachments": {},
+            "cell_type": "markdown",
+            "metadata": {
+                "azdata_cell_guid": "54eb1c33-1528-4f9d-8f26-e58f5d798403",
+                "language": "sql"
+            },
+            "source": [
+                "### **Tabla Desarrollador**"
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": null,
+            "metadata": {
+                "azdata_cell_guid": "c4f191ed-a686-4c16-b17f-03b09668c37d",
+                "language": "sql",
+                "tags": [
+                    "hide_input"
+                ]
+            },
+            "outputs": [],
+            "source": [
+                "-- Crear la tabla Desarrollador\n",
+                "CREATE TABLE TODOUSER.Desarrollador (\n",
+                "    idDesarrollador NUMBER PRIMARY KEY,\n",
+                "    idUsuario NUMBER NULL,\n",
+                "    Modalidad VARCHAR2(100) DEFAULT 'Presencial',\n",
+                "    CodigoChamba VARCHAR2(100) DEFAULT '0888880',\n",
+                "    Activo NUMBER(1) DEFAULT 1 CHECK (Activo IN (0,1)),\n",
+                "    CONSTRAINT fk_Desarrollador_Usuario FOREIGN KEY (idUsuario) REFERENCES TODOUSER.Usuarios(idUsuario)\n",
+                ");\n",
+                "\n",
+                "CREATE SEQUENCE TODOUSER.Desarrollador_seq START WITH 1 INCREMENT BY 1;\n",
+                "CREATE OR REPLACE TRIGGER TODOUSER.Desarrollador_trg\n",
+                "BEFORE INSERT ON TODOUSER.Desarrollador\n",
+                "FOR EACH ROW\n",
+                "BEGIN\n",
+                "    IF :NEW.idDesarrollador IS NULL THEN\n",
+                "        SELECT Desarrollador_seq.NEXTVAL INTO :NEW.idDesarrollador FROM DUAL;\n",
+                "    END IF;\n",
+                "END;\n",
+                "/"
+            ]
+        },
+        {
+            "attachments": {},
+            "cell_type": "markdown",
+            "metadata": {
+                "azdata_cell_guid": "c3b2a487-3a3c-415d-88c5-44c92c02118d",
+                "language": "sql"
+            },
+            "source": [
+                "### **Tabla Tarea**"
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": null,
+            "metadata": {
+                "azdata_cell_guid": "433ce3d1-34b7-4c34-a579-38edc8022e6b",
+                "language": "sql",
+                "tags": [
+                    "hide_input"
+                ]
+            },
+            "outputs": [],
+            "source": [
+                "-- Crear la tabla Tarea\n",
+                "CREATE TABLE TODOUSER.Tarea (\n",
+                "    idTarea NUMBER PRIMARY KEY,\n",
+                "    Descripcion VARCHAR2(100) NULL,\n",
+                "    FechaEntrega TIMESTAMP NULL,\n",
+                "    Horas_Estimadas NUMBER DEFAULT 2,\n",
+                "    Horas_Reales VARCHAR2(100) DEFAULT '2',\n",
+                "    Activo NUMBER(1) DEFAULT 1 CHECK (Activo IN (0,1)),\n",
+                "    Estado VARCHAR2(100) DEFAULT 'Activo',\n",
+                "    Categoria VARCHAR2(100) DEFAULT 'Tarea',\n",
+                "    idDesarrollador NUMBER NULL,\n",
+                "    idProyecto NUMBER NULL,\n",
+                "    idSprint NUMBER NULL,\n",
+                "    CONSTRAINT fk_Tarea_Desarrollador FOREIGN KEY (idDesarrollador) REFERENCES TODOUSER.Desarrollador(idDesarrollador),\n",
+                "    CONSTRAINT fk_Tarea_Proyecto FOREIGN KEY (idProyecto)           REFERENCES TODOUSER.Proyecto(idProyecto),\n",
+                "    CONSTRAINT fk_Tarea_Sprint FOREIGN KEY (idSprint)               REFERENCES TODOUSER.Sprint(idSprint)\n",
+                ");\n",
+                "\n",
+                "CREATE SEQUENCE TODOUSER.Tarea_seq START WITH 1 INCREMENT BY 1;\n",
+                "\n",
+                "CREATE OR REPLACE TRIGGER TODOUSER.Tarea_trg\n",
+                "BEFORE INSERT ON TODOUSER.Tarea\n",
+                "FOR EACH ROW\n",
+                "BEGIN\n",
+                "    IF :NEW.idTarea IS NULL THEN\n",
+                "        SELECT Tarea_seq.NEXTVAL INTO :NEW.idTarea FROM DUAL;\n",
+                "    END IF;\n",
+                "END;\n",
+                "/\n"
+            ]
+        },
+        {
+            "attachments": {},
+            "cell_type": "markdown",
+            "metadata": {
+                "azdata_cell_guid": "37091b36-0f30-4aa6-aa6b-b6a4bd69ee1f",
+                "language": "sql"
+            },
+            "source": [
+                "### **Tabla Uusario\\_Equipo**"
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": null,
+            "metadata": {
+                "azdata_cell_guid": "9104cf80-814d-48ad-8c9e-83af8fb1a487",
+                "language": "sql",
+                "tags": [
+                    "hide_input"
+                ]
+            },
+            "outputs": [],
+            "source": [
+                "-- Crear la tabla Usuario_Equipo\n",
+                "CREATE TABLE TODOUSER.Usuario_Equipo (\n",
+                "    idUsuario_equipo NUMBER PRIMARY KEY,\n",
+                "    idUsuario NUMBER NULL,\n",
+                "    idEquipo NUMBER NULL,\n",
+                "    Rol VARCHAR2(100) DEFAULT 'Desarrollador',\n",
+                "    Activo NUMBER(1) DEFAULT 1 CHECK (Activo IN (0,1)),\n",
+                "    CONSTRAINT fk_UsuarioEquipo_Usuario FOREIGN KEY (idUsuario) REFERENCES TODOUSER.Usuarios(idUsuario),\n",
+                "    CONSTRAINT fk_UsuarioEquipo_Equipo FOREIGN KEY (idEquipo) REFERENCES TODOUSER.Equipo(idEquipo)\n",
+                ");\n",
+                "\n",
+                "CREATE SEQUENCE TODOUSER.Usuario_Equipo_seq START WITH 1 INCREMENT BY 1;\n",
+                "CREATE OR REPLACE TRIGGER TODOUSER.Usuario_Equipo_trg\n",
+                "BEFORE INSERT ON TODOUSER.Usuario_Equipo\n",
+                "FOR EACH ROW\n",
+                "BEGIN\n",
+                "    IF :NEW.idUsuario_equipo IS NULL THEN\n",
+                "        SELECT TODOUSER.Usuario_Equipo_seq.NEXTVAL INTO :NEW.idUsuario_equipo FROM DUAL;\n",
+                "    END IF;\n",
+                "END;\n",
+                "/\n"
+            ]
+        },
+        {
+            "attachments": {},
+            "cell_type": "markdown",
+            "metadata": {
+                "azdata_cell_guid": "68d89bc8-b846-4e79-9095-e0264699b326",
+                "language": "sql"
+            },
+            "source": [
+                "### **Tabla Equipo\\_Proyecto**"
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": null,
+            "metadata": {
+                "azdata_cell_guid": "eb3d44a7-9b91-4012-98cd-f6b1d2838913",
+                "language": "sql",
+                "tags": [
+                    "hide_input"
+                ]
+            },
+            "outputs": [],
+            "source": [
+                "-- Crear la tabla Equipo_Proyecto\n",
+                "CREATE TABLE TODOUSER.Equipo_Proyecto (\n",
+                "    idEquipo_Proyecto NUMBER PRIMARY KEY,\n",
+                "    idEquipo NUMBER NULL,\n",
+                "    idProyecto NUMBER NULL,\n",
+                "    Activo NUMBER(1) DEFAULT 1 CHECK (Activo IN (0,1)),\n",
+                "    CONSTRAINT fk_EquipoProyecto_Equipo FOREIGN KEY (idEquipo)          REFERENCES TODOUSER.Equipo(idEquipo),\n",
+                "    CONSTRAINT fk_EquipoProyecto_Proyecto FOREIGN KEY (idProyecto)      REFERENCES TODOUSER.Proyecto(idProyecto)\n",
+                ");\n",
+                "\n",
+                "CREATE SEQUENCE TODOUSER.Equipo_Proyecto_seq START WITH 1 INCREMENT BY 1;\n",
+                "\n",
+                "CREATE OR REPLACE TRIGGER TODOUSER.Equipo_Proyecto_trg\n",
+                "BEFORE INSERT ON TODOUSER.Equipo_Proyecto\n",
+                "FOR EACH ROW\n",
+                "BEGIN\n",
+                "    IF :NEW.idEquipo_Proyecto IS NULL THEN\n",
+                "        SELECT Equipo_Proyecto_seq.NEXTVAL INTO :NEW.idEquipo_Proyecto FROM DUAL;\n",
+                "    END IF;\n",
+                "END;\n",
+                "/"
+            ]
+        },
+        {
+            "attachments": {},
+            "cell_type": "markdown",
+            "metadata": {
+                "azdata_cell_guid": "ed9ae270-df06-4c76-ab06-f6a3d4b67b1a"
+            },
+            "source": [
+                "## **Registros en la base de datos**\n",
+                "\n",
+                "A continuacion se muestran los registros en la base de datos, excluyendo las relaciones"
+            ]
+        },
+        {
+            "attachments": {},
+            "cell_type": "markdown",
+            "metadata": {
+                "azdata_cell_guid": "0715284c-6cff-405f-abe6-57f9bb9f3a19"
+            },
+            "source": [
+                "### **Registro en Usuarios**"
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": null,
+            "metadata": {
+                "azdata_cell_guid": "7b329f4c-9b70-49b8-8c96-ee76903ac703",
+                "language": "sql",
+                "tags": [
+                    "hide_input"
+                ]
+            },
+            "outputs": [],
+            "source": [
+                "-- Insertar en Usuarios\n",
+                "\n",
+                "INSERT INTO Usuarios (idUsuario, Nombre, Correo, TokenChannel, Telefono, UsuarioT, Activo) \n",
+                "VALUES \n",
+                "(Usuarios_seq.NEXTVAL, 'Victor Escalante', 'noesmisaesunbot@gmail.com', '7714149514', '5216673909470', '@misaentelegram', 1);\n",
+                "\n",
+                "INSERT INTO Usuarios (idUsuario, Nombre, Correo, TokenChannel, Telefono, UsuarioT, Activo) \n",
+                "VALUES \n",
+                "(Usuarios_seq.NEXTVAL, 'Hugo Peres', 'laspruebillas2@gmail.com', '6293190326', '5552345678', '@SI_koalapex', 1);\n",
+                "\n",
+                "INSERT INTO Usuarios (idUsuario, Nombre, Correo, TokenChannel, Telefono, UsuarioT, Activo) \n",
+                "VALUES \n",
+                "(Usuarios_seq.NEXTVAL, 'Diego Reyna', 'diegorlv@hotmail.com', '1597893819', '5214493297419', '@DiegoReyna0', 1);\n",
+                "\n",
+                "INSERT INTO Usuarios (idUsuario, Nombre, Correo, TokenChannel, Telefono, UsuarioT, Activo) \n",
+                "VALUES \n",
+                "(Usuarios_seq.NEXTVAL, 'Julio Madrigal', 'idharmacorp@hotmail.com', '7418562605', '5554567890', '@JULIUS1_1', 1);\n",
+                "\n",
+                "INSERT INTO Usuarios (idUsuario, Nombre, Correo, TokenChannel, Telefono, UsuarioT, Activo) \n",
+                "VALUES \n",
+                "(Usuarios_seq.NEXTVAL, 'Adan Ruiz', 'adan.ruiz@email.com', NULL, '5555678901', NULL, 1);\n",
+                "\n",
+                "INSERT INTO Usuarios (idUsuario, Nombre, Correo, TokenChannel, Telefono, UsuarioT, Activo) \n",
+                "VALUES \n",
+                "(Usuarios_seq.NEXTVAL, 'Martha Galindo', 'martha.galindo@email.com', NULL, '5556789012', NULL, 1);\n",
+                "\n",
+                "INSERT INTO Usuarios (idUsuario, Nombre, Correo, TokenChannel, Telefono, UsuarioT, Activo) \n",
+                "VALUES \n",
+                "(Usuarios_seq.NEXTVAL, 'Sergio Flores', 'sergio.flores@email.com', NULL, '5557890123', NULL, 1);\n",
+                "\n",
+                "INSERT INTO Usuarios (idUsuario, Nombre, Correo, TokenChannel, Telefono, UsuarioT, Activo) \n",
+                "VALUES \n",
+                "(Usuarios_seq.NEXTVAL, 'Veronica Rodriguez', 'veronica.rodriguez@email.com', NULL, '5558901234', NULL, 1);\n"
+            ]
+        },
+        {
+            "attachments": {},
+            "cell_type": "markdown",
+            "metadata": {
+                "azdata_cell_guid": "b9fdffdb-977c-455c-a774-749ca8406895"
+            },
+            "source": [
+                "### **Registro en Desarrollador**"
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": null,
+            "metadata": {
+                "azdata_cell_guid": "15810b6b-d08c-4593-8b74-4bba99be1a23",
+                "language": "sql",
+                "tags": [
+                    "hide_input"
+                ]
+            },
+            "outputs": [],
+            "source": [
+                "-- Insertar en Desarrollador\n",
+                "INSERT INTO TODOUSER.Desarrollador (idUsuario, Modalidad, CodigoChamba, Activo) \n",
+                "SELECT idUsuario, 'Presencial', '0888880', 1 FROM TODOUSER.Usuarios WHERE Nombre = 'Victor Escalante'\n",
+                "UNION ALL\n",
+                "SELECT idUsuario, 'Remoto', '0444440', 1 FROM TODOUSER.Usuarios WHERE Nombre = 'Hugo Peres'\n",
+                "UNION ALL\n",
+                "SELECT idUsuario, 'Híbrido', '0484480', 1 FROM TODOUSER.Usuarios WHERE Nombre = 'Diego Reyna'\n",
+                "UNION ALL\n",
+                "SELECT idUsuario, 'Presencial', '0888880', 1 FROM TODOUSER.Usuarios WHERE Nombre = 'Julio Madrigal';\n"
+            ]
+        },
+        {
+            "attachments": {},
+            "cell_type": "markdown",
+            "metadata": {
+                "azdata_cell_guid": "255d2a67-1b38-4c2a-b01e-bcbe902f43df",
+                "language": "sql"
+            },
+            "source": [
+                "### **Registro en Manager**"
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": null,
+            "metadata": {
+                "azdata_cell_guid": "6c0f2d58-9ae6-4aab-b05e-e42081cdc959",
+                "language": "sql",
+                "tags": [
+                    "hide_input"
+                ]
+            },
+            "outputs": [],
+            "source": [
+                "-- Insertar en Manager\n",
+                "INSERT INTO TODOUSER.Manager (idUsuario, Activo) \n",
+                "SELECT idUsuario, 1 FROM TODOUSER.Usuarios WHERE Nombre = 'Adan Ruiz'\n",
+                "UNION ALL\n",
+                "SELECT idUsuario, 1 FROM TODOUSER.Usuarios WHERE Nombre = 'Martha Galindo'\n",
+                "UNION ALL\n",
+                "SELECT idUsuario, 1 FROM TODOUSER.Usuarios WHERE Nombre = 'Sergio Flores'\n",
+                "UNION ALL\n",
+                "SELECT idUsuario, 1 FROM TODOUSER.Usuarios WHERE Nombre = 'Veronica Rodriguez';"
+            ]
+        },
+        {
+            "attachments": {},
+            "cell_type": "markdown",
+            "metadata": {
+                "azdata_cell_guid": "047a0f85-f87b-4972-8917-e344ac7b0458",
+                "language": "sql"
+            },
+            "source": [
+                "### **Registro en Equipos**"
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": null,
+            "metadata": {
+                "azdata_cell_guid": "dcb3e926-6f9b-40f7-b829-c02c92534b9b",
+                "language": "sql",
+                "tags": [
+                    "hide_input"
+                ]
+            },
+            "outputs": [],
+            "source": [
+                "-- Insertar Equipos\n",
+                "INSERT INTO TODOUSER.Equipo (idEquipo, Nombre, Notificacion, Activo) \n",
+                "VALUES (TODOUSER.Equipo_seq.NEXTVAL, 'Koalas', TO_TIMESTAMP('12:00:00', 'HH24:MI:SS'), 1);\n",
+                "\n",
+                "INSERT INTO TODOUSER.Equipo (idEquipo, Nombre, Notificacion, Activo) \n",
+                "VALUES (TODOUSER.Equipo_seq.NEXTVAL, 'KoalAndroid', TO_TIMESTAMP('12:00:00', 'HH24:MI:SS'), 1);\n",
+                "\n",
+                "INSERT INTO TODOUSER.Equipo (idEquipo, Nombre, Notificacion, Activo) \n",
+                "VALUES (TODOUSER.Equipo_seq.NEXTVAL, 'KoalaBOT', TO_TIMESTAMP('12:00:00', 'HH24:MI:SS'), 1);"
+            ]
+        },
+        {
+            "attachments": {},
+            "cell_type": "markdown",
+            "metadata": {
+                "azdata_cell_guid": "5ac58f9b-e172-4a07-a346-496a19917fad",
+                "language": "sql"
+            },
+            "source": [
+                "### **Registro en Proyecto**"
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": null,
+            "metadata": {
+                "azdata_cell_guid": "a79cd7b1-32d4-42bb-8c0c-9972b3c5ab83",
+                "language": "sql",
+                "tags": [
+                    "hide_input"
+                ]
+            },
+            "outputs": [],
+            "source": [
+                "-- Insertar en proyecto\n",
+                "INSERT INTO TODOUSER.Proyecto (idProyecto, Nombre, FechaCreacion, Descripcion, Activo) \n",
+                "VALUES (TODOUSER.Proyecto_seq.NEXTVAL, 'KoalaventurasAWAQ', TO_DATE('2024-02-12', 'YYYY-MM-DD'), 'Un proyecto para el socio formador AWAQ', 1);\n",
+                "\n",
+                "INSERT INTO TODOUSER.Proyecto (idProyecto, Nombre, FechaCreacion, Descripcion, Activo) \n",
+                "VALUES (TODOUSER.Proyecto_seq.NEXTVAL, 'KoalaDEX', TO_DATE('2024-08-10', 'YYYY-MM-DD'), 'Atrapalos a todos', 1);\n",
+                "\n",
+                "INSERT INTO TODOUSER.Proyecto (idProyecto, Nombre, FechaCreacion, Descripcion, Activo) \n",
+                "VALUES (TODOUSER.Proyecto_seq.NEXTVAL, 'KoalaBOT', TO_DATE('2025-02-12', 'YYYY-MM-DD'), 'Interactúa por Telegram con nuestro bot', 1);"
+            ]
+        },
+        {
+            "attachments": {},
+            "cell_type": "markdown",
+            "metadata": {
+                "azdata_cell_guid": "481d44da-9485-4ef6-9af7-9159ca20bae0"
+            },
+            "source": [
+                "### **Registro en Sprint**"
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": null,
+            "metadata": {
+                "azdata_cell_guid": "30598279-414a-46dd-98d0-df6e101ed307",
+                "language": "sql",
+                "tags": [
+                    "hide_input"
+                ]
+            },
+            "outputs": [],
+            "source": [
+                "-- Insertar 5 Sprints para cada Proyecto\n",
+                "BEGIN\n",
+                "    FOR rec IN (SELECT idProyecto, FechaCreacion FROM TODOUSER.Proyecto) LOOP\n",
+                "        FOR i IN 1..5 LOOP\n",
+                "            INSERT INTO TODOUSER.Sprint (idProyecto, FechaInicio, FechaFin, Nombre, Activo)\n",
+                "            VALUES (\n",
+                "                rec.idProyecto,\n",
+                "                rec.FechaCreacion + (7 * (i - 1)),  -- Inicio del sprint\n",
+                "                rec.FechaCreacion + (7 * i),        -- Fin del sprint (una semana después)\n",
+                "                'Sprint ' || i,\n",
+                "                1\n",
+                "            );\n",
+                "        END LOOP;\n",
+                "    END LOOP;\n",
+                "END;\n",
+                "/"
+            ]
+        },
+        {
+            "attachments": {},
+            "cell_type": "markdown",
+            "metadata": {
+                "azdata_cell_guid": "247371f6-1fc5-463f-805f-6bfc9304c3ff",
+                "language": "sql"
+            },
+            "source": [
+                "### **Registro en Tareas**\n"
+            ]
+        },
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "#### 1. **Tareas de Victor Escalante**\n",
+                "\n"
+            ]
+        },
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "| Fecha | Actividad | Tipo |\n",
+                "|-------|-----------|------|\n",
+                "| 2024-02-12 | Introducción a Docker | Actividad-clase |\n",
+                "| 2024-02-14 | Actividad de clase: Demanda | Actividad-clase |\n",
+                "| 2024-02-17 | M4 \\| Tarea: Obtención de la Información | Entregables-proyecto |\n",
+                "| 2024-02-17 | OCI Development Environment | Actividad-clase |\n",
+                "| 2024-02-17 | Práctica Linux 1 | Actividad-clase |\n",
+                "| 2024-02-18 | M3 \\| Actividad de aprendizaje: Metodología a utilizar | Actividad-clase |\n",
+                "| 2024-02-19 | Desplegar un microservicio integrado operaciones de Bases de Datos ATP | Actividad-clase |\n",
+                "| 2024-02-20 | Actividad de aprendizaje: DB ER / Script / ADB | Actividad-clase |\n",
+                "| 2024-02-20 | Cursos de capacitación: OCI Foundations Associate Certification | Entregables-proyecto |\n",
+                "| 2024-02-20 | Cursos de capacitación: Cloud Native Applications | Entregables-proyecto |\n",
+                "| 2024-02-20 | M7 Actividad de aprendizaje 1: Práctica Mockup | Actividad-clase |\n",
+                "| 2024-02-20 | Desplegar proyecto de RETO en sus ambientes locales + Docker + ATP | Despliegue-proyecto |\n",
+                "| 2024-02-21 | Actividad 1 - Calidad | Actividad-clase |\n",
+                "| 2024-02-21 | ActClase: Estándar IEEE 29148 y 830 | Actividad-clase |\n",
+                "| 2024-02-24 | M3 \\| Tarea: EDT/WBS del Proyecto | Actividad-clase |\n",
+                "| 2024-02-24 | M4 \\| Tarea: Historias de Usuario | Actividad-clase |\n",
+                "| 2024-02-24 | Desplegar proyecto de RETO en sus ambientes locales + Docker + ATP + Container Registry | Despliegue-proyecto |\n",
+                "| 2024-02-25 | Actividad 2 - Calidad | Actividad-clase |\n",
+                "| 2024-02-25 | M3 \\| Actividad en clase: Creación de Backlog y su priorización | Actividad-clase |\n",
+                "| 2024-02-28 | Actividad: Mapas mentales de preparación sobre estándares de Ingeniería de Software | Actividad-clase |\n",
+                "| 2024-03-03 | Actividad Clase: HTML5 Canvas | Actividad-clase |\n",
+                "| 2024-03-02 | M4 \\| Actividad en Clase: Versión inicial de la especificación de requerimientos | Actividad-clase |\n",
+                "| 2024-03-05 | M3 \\| Actividad en clase: Identificación de riesgos | Actividad-clase\n",
+                "| 2024-03-07 | [RETO] \\| Generar modelos de tablas | Reto |   "
+            ]
+        },
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "##### Script"
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": null,
+            "metadata": {
+                "azdata_cell_guid": "6738c870-511e-4640-955f-c852e09df281",
+                "language": "sql"
+            },
+            "outputs": [],
+            "source": [
+                "-- Tareas asignadas a Victor Misael en el proyecto KoalaBOT\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Introducción a Docker', TO_DATE('2024-02-12', 'YYYY-MM-DD'), 2, 3, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.Desarrollador WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Victor Escalante')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 16));\n",
+                "\n",
+                "-- Tarea 2: Actividad de clase : Demanda (Sprint 1)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Actividad de clase : Demanda', TO_DATE('2024-02-14', 'YYYY-MM-DD'), 2, 2, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.Desarrollador WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Victor Escalante')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 11 + 5));\n",
+                "\n",
+                "-- Tarea 3: OCI Developement Enviroment (Sprint 2)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'OCI Developement Enviroment', TO_DATE('2024-02-17', 'YYYY-MM-DD'), 2, 4, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.Desarrollador WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Victor Escalante')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 12 + 5));\n",
+                "\n",
+                "-- Tarea 4: Practica Linux 1 (Sprint 2)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Practica Linux 1', TO_DATE('2024-02-17', 'YYYY-MM-DD'), 2, 3, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.Desarrollador WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Victor Escalante')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 12 + 5));\n",
+                "\n",
+                "-- Tarea 5: M4 | Tarea: Obtención de la Información (Sprint 2)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'M4 | Tarea: Obtención de la Información', TO_DATE('2024-02-17', 'YYYY-MM-DD'), 2, 3, 1, 'Completado', 'Entregables-proyeto',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.Desarrollador WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Victor Escalante')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 12 + 5));\n",
+                "\n",
+                "-- Tarea 6: M3 | Actividad de aprendizaje: Metodología a utilizar (Sprint 2)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'M3 | Actividad de aprendizaje: Metodología a utilizar', TO_DATE('2024-02-18', 'YYYY-MM-DD'), 2, 4, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.Desarrollador WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Victor Escalante')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 12 + 5));\n",
+                "\n",
+                "-- Tarea 7: Desplegar un microservicio integrado operaciones de Bases de Datos ATP (Sprint 2)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Desplegar un microservicio integrado operaciones de Bases de Datos ATP', TO_DATE('2024-02-19', 'YYYY-MM-DD'), 2, 3, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.Desarrollador WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Victor Escalante')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 12 + 5));\n",
+                "\n",
+                "-- Tarea 8: Actividad de aprendizaje: DB ER / Script / ADB (Sprint 2)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Actividad de aprendizaje: DB ER / Script / ADB', TO_DATE('2024-02-20', 'YYYY-MM-DD'), 2, 2, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.Desarrollador WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Victor Escalante')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 12 + 5));\n",
+                "\n",
+                "-- Tarea 9: Cursos de capacitación : OCI Foundations Associate Certification (Sprint 2)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Cursos de capacitación : OCI Foundations Associate Certification', TO_DATE('2024-02-20', 'YYYY-MM-DD'), 2, 4, 1, 'Completado', 'Entregables-proyeto',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.Desarrollador WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Victor Escalante')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 12 + 5));\n",
+                "\n",
+                "-- Tarea 10: Cursos de capacitación : Cloud Native Applications (Sprint 2)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Cursos de capacitación : Cloud Native Applications', TO_DATE('2024-02-20', 'YYYY-MM-DD'), 2, 3, 1, 'Completado', 'Entregables-proyeto',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.Desarrollador WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Victor Escalante')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 12 + 5));\n",
+                "\n",
+                "-- Tarea 11: M7 Actividad de aprendizaje 1 : Práctica Mockup (Sprint 2)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'M7 Actividad de aprendizaje 1 : Práctica Mockup', TO_DATE('2024-02-20', 'YYYY-MM-DD'), 2, 3, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.Desarrollador WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Victor Escalante')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 12 + 5));\n",
+                "\n",
+                "-- Tarea 12: Desplegar proyecto de RETO en sus ambientes locales + Docker + ATP (Sprint 2)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Desplegar proyecto de RETO en sus ambientes locales + Docker + ATP', TO_DATE('2024-02-20', 'YYYY-MM-DD'), 4, 6, 1, 'Completado', 'Despliegue-proyecto',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.Desarrollador WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Victor Escalante')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 12 + 5));\n",
+                "\n",
+                "-- Tarea 13: Actividad 1 - Calidad (Sprint 2)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Actividad 1 - Calidad', TO_DATE('2024-02-21', 'YYYY-MM-DD'), 2, 2, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.Desarrollador WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Victor Escalante')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 12 + 5));\n",
+                "\n",
+                "-- Tarea 14: ActClase: Estándar IEEE 29148 y 830 (Sprint 2)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'ActClase: Estándar IEEE 29148 y 830', TO_DATE('2024-02-21', 'YYYY-MM-DD'), 2, 4, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.Desarrollador WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Victor Escalante')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 12 + 5));\n",
+                "\n",
+                "-- Tarea 15: M3 | Tarea: EDT/WBS del Proyecto (Sprint 3)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'M3 | Tarea: EDT/WBS del Proyecto', TO_DATE('2024-02-24', 'YYYY-MM-DD'), 2, 3, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.Desarrollador WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Victor Escalante')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 13 + 5));\n",
+                "\n",
+                "-- Tarea 16: M4 | Tarea: Historias de Usuario (Sprint 3)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'M4 | Tarea: Historias de Usuario', TO_DATE('2024-02-24', 'YYYY-MM-DD'), 2, 4, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.Desarrollador WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Victor Escalante')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 13 + 5));\n",
+                "\n",
+                "-- Tarea 17: Desplegar proyecto de RETO en sus ambientes locales + Docker + ATP + Container Registry (Sprint 3)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Desplegar proyecto de RETO en sus ambientes locales + Docker + ATP + Container Registry', TO_DATE('2024-02-24', 'YYYY-MM-DD'), 4, 6, 1, 'Completado', 'Despliegue-proyecto',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.Desarrollador WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Victor Escalante')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 13 + 5));\n",
+                "\n",
+                "-- Tarea 18: Actividad 2 - Calidad (Sprint 3)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Actividad 2 - Calidad', TO_DATE('2024-02-25', 'YYYY-MM-DD'), 2, 3, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.Desarrollador WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Victor Escalante')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 13 + 5));\n",
+                "\n",
+                "-- Tarea 19: M3 | Actividad en clase: Creación de Backlog y su priorización (Sprint 3)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'M3 | Actividad en clase: Creación de Backlog y su priorización', TO_DATE('2024-02-25', 'YYYY-MM-DD'), 2, 4, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.Desarrollador WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Victor Escalante')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 13 + 5));\n",
+                "\n",
+                "-- Tarea 20: Actividad: Mapas mentales de preparación sobre estándares de Ingeniería de Software (Sprint 3)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Actividad: Mapas mentales de preparación sobre estándares de Ingeniería de Software', TO_DATE('2024-02-28', 'YYYY-MM-DD'), 2, 3, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.Desarrollador WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Victor Escalante')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 13 + 5));\n",
+                "\n",
+                "-- Tarea 21: [RETO] | Generar modelos de tablas (Sprint 5)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, '[RETO] \\| Generar modelos de tablas | Reto |', TO_DATE('2024-03-11', 'YYYY-MM-DD'), 2, 3, 1, 'Activa', 'Reto',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.Desarrollador WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Victor Escalante')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 13 + 5));\n",
+                "\n",
+                "-- Tarea 22: [RETO] | Generar modelos de tablas (Sprint 7)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Web Design: Media Queries [Actividad Clase]', TO_DATE('2024-03-24', 'YYYY-MM-DD'), 2, 1, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.Desarrollador WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Victor Escalante')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 41));\n",
+                "\n",
+                "-- Tarea 23: [RETO] | Generar modelos de tablas (Sprint 7)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Act de Clase: Seis Sombreros', TO_DATE('2024-03-25', 'YYYY-MM-DD'), 2, 1, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.Desarrollador WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Victor Escalante')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 41));\n",
+                "\n",
+                "-- Tarea 24: [RETO] | Generar modelos de tablas (Sprint 7)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Web: SQL MM [Actividad Clase]', TO_DATE('2024-03-26', 'YYYY-MM-DD'), 1, 1, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.Desarrollador WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Victor Escalante')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 41));\n",
+                "\n",
+                "-- Tarea 25: [RETO] | Generar modelos de tablas (Sprint 7)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, '[Actividad Clase] Perform a String recognition using Selenium for Java', TO_DATE('2024-03-26', 'YYYY-MM-DD'), 1, 1, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.Desarrollador WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Victor Escalante')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 41));\n",
+                "\n",
+                "-- Tarea 26: [RETO] | Generar modelos de tablas (Sprint 7)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'M1 | Actividad en Clase: ¿Qué sigue?', TO_DATE('2024-03-27', 'YYYY-MM-DD'), 3, 3, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.Desarrollador WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Victor Escalante')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 41));\n",
+                "\n",
+                "-- Tarea 27: [RETO] | Generar modelos de tablas (Sprint 7)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, '[Actividad Clase] Spring Boot Static Files', TO_DATE('2024-03-27', 'YYYY-MM-DD'), 1, 1, 1, 'Activa', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.Desarrollador WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Victor Escalante')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 41));\n",
+                "\n",
+                "-- Tarea 28: [RETO] | Generar modelos de tablas (Sprint 7)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Actividad Calidad 1 : Concepto de Pruebas Unitarias', TO_DATE('2024-03-28', 'YYYY-MM-DD'), 3, 3, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.Desarrollador WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Victor Escalante')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 41));"
+            ]
+        },
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "#### 2. **Tareas Diego Reyna**"
+            ]
+        },
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "| Fecha | Actividad | Tipo |\n",
+                "|-------|-----------|------|\n",
+                "| 2024-02-12 | Introducción a Docker | Actividad-clase |\n",
+                "| 2024-02-14 | Actividad de clase: Demanda | Actividad-clase |\n",
+                "| 2024-02-17 | M4 \\| Tarea: Obtención de la Información | Entregables-proyecto |\n",
+                "| 2024-02-17 | OCI Development Environment | Actividad-clase |\n",
+                "| 2024-02-17 | Práctica Linux 1 | Actividad-clase |\n",
+                "| 2024-02-18 | M3 \\| Actividad de aprendizaje: Metodología a utilizar | Actividad-clase |\n",
+                "| 2024-02-20 | Cursos de capacitación: OCI Foundations Associate Certification | Entregables-proyecto |\n",
+                "| 2024-02-20 | Cursos de capacitación: Cloud Native Applications | Entregables-proyecto |\n",
+                "| 2024-02-20 | M7 Actividad de aprendizaje 1: Práctica Mockup | Actividad-clase |\n",
+                "| 2024-02-21 | Actividad 1 - Calidad | Actividad-clase |\n",
+                "| 2024-02-21 | ActClase: Estándar IEEE 29148 y 830 | Actividad-clase |\n",
+                "| 2024-02-25 | Actividad 2 - Calidad | Actividad-clase |\n",
+                "| 2024-02-13 | M3 \\| Actividad de Aprendizaje:!Tendremos Boda! | Actividad-clase\n",
+                "| 2024-02-24 | M4 \\| Actividad en clase: Modelando al usuario | Actividad-clase"
+            ]
+        },
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "##### Script"
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": null,
+            "metadata": {},
+            "outputs": [],
+            "source": [
+                "-- Tarea 1: Introducción a Docker (Sprint 1)\n",
+                "INSERT INTO TODOUSER.TAREA (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Introducción a Docker', TO_DATE('2024-02-12', 'YYYY-MM-DD'), 2, 3, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.USUARIOS WHERE Nombre = 'Diego Reyna')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.PROYECTO WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.SPRINT WHERE idSprint = 5 + 11));\n",
+                "\n",
+                "-- Tarea 2: M3 | Actividad de Aprendizaje:!Tendremos Boda! (Sprint 1)\n",
+                "INSERT INTO TODOUSER.TAREA (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'M3 | Actividad de Aprendizaje:!Tendremos Boda!', TO_DATE('2024-02-13', 'YYYY-MM-DD'), 2, 2, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.USUARIOS WHERE Nombre = 'Diego Reyna')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.PROYECTO WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.SPRINT WHERE idSprint = 5 + 11));\n",
+                "\n",
+                "-- Tarea 3: Actividad de clase: Demanda (Sprint 1)\n",
+                "INSERT INTO TODOUSER.TAREA (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Actividad de clase: Demanda', TO_DATE('2024-02-14', 'YYYY-MM-DD'), 2, 3, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.USUARIOS WHERE Nombre = 'Diego Reyna')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.PROYECTO WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.SPRINT WHERE idSprint = 5 + 11));\n",
+                "\n",
+                "-- Tarea 4: M4 | Tarea: Obtención de la Información (Sprint 2)\n",
+                "INSERT INTO TODOUSER.TAREA (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'M4 | Tarea: Obtención de la Información', TO_DATE('2024-02-17', 'YYYY-MM-DD'), 2, 4, 1, 'Completado', 'Entregables-proyecto',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.USUARIOS WHERE Nombre = 'Diego Reyna')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.PROYECTO WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.SPRINT WHERE idSprint = 5 + 12));\n",
+                "\n",
+                "-- Tarea 5: OCI Development Environment (Sprint 2)\n",
+                "INSERT INTO TODOUSER.TAREA (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'OCI Development Environment', TO_DATE('2024-02-17', 'YYYY-MM-DD'), 2, 3, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.USUARIOS WHERE Nombre = 'Diego Reyna')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.PROYECTO WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.SPRINT WHERE idSprint = 5 + 12));\n",
+                "\n",
+                "-- Tarea 6: Práctica Linux 1 (Sprint 2)\n",
+                "INSERT INTO TODOUSER.TAREA (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Práctica Linux 1', TO_DATE('2024-02-17', 'YYYY-MM-DD'), 2, 2, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.USUARIOS WHERE Nombre = 'Diego Reyna')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.PROYECTO WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.SPRINT WHERE idSprint = 5 + 12));\n",
+                "\n",
+                "-- Tarea 7: M3 | Actividad de aprendizaje: Metodología a utilizar (Sprint 2)\n",
+                "INSERT INTO TODOUSER.TAREA (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'M3 | Actividad de aprendizaje: Metodología a utilizar', TO_DATE('2024-02-18', 'YYYY-MM-DD'), 2, 3, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.USUARIOS WHERE Nombre = 'Diego Reyna')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.PROYECTO WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.SPRINT WHERE idSprint = 5 + 12));\n",
+                "\n",
+                "-- Tarea 8: Cursos de capacitación: OCI Foundations Associate Certification (Sprint 2)\n",
+                "INSERT INTO TODOUSER.TAREA (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Cursos de capacitación: OCI Foundations Associate Certification', TO_DATE('2024-02-20', 'YYYY-MM-DD'), 2, 4, 1, 'Completado', 'Entregables-proyecto',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.USUARIOS WHERE Nombre = 'Diego Reyna')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.PROYECTO WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.SPRINT WHERE idSprint = 5 + 12));\n",
+                "\n",
+                "-- Tarea 9: Cursos de capacitación: Cloud Native Applications (Sprint 2)\n",
+                "INSERT INTO TODOUSER.TAREA (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Cursos de capacitación: Cloud Native Applications', TO_DATE('2024-02-20', 'YYYY-MM-DD'), 2, 3, 1, 'Completado', 'Entregables-proyecto',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.USUARIOS WHERE Nombre = 'Diego Reyna')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.PROYECTO WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.SPRINT WHERE idSprint = 5 + 12));\n",
+                "\n",
+                "-- Tarea 10: M7 Actividad de aprendizaje 1: Práctica Mockup (Sprint 2)\n",
+                "INSERT INTO TODOUSER.TAREA (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'M7 Actividad de aprendizaje 1: Práctica Mockup', TO_DATE('2024-02-20', 'YYYY-MM-DD'), 2, 2, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.USUARIOS WHERE Nombre = 'Diego Reyna')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.PROYECTO WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.SPRINT WHERE idSprint = 5 + 12));\n",
+                "\n",
+                "-- Tarea 11: Actividad 1 - Calidad (Sprint 2)\n",
+                "INSERT INTO TODOUSER.TAREA (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Actividad 1 - Calidad', TO_DATE('2024-02-21', 'YYYY-MM-DD'), 2, 3, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.USUARIOS WHERE Nombre = 'Diego Reyna')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.PROYECTO WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.SPRINT WHERE idSprint = 5 + 12));\n",
+                "\n",
+                "-- Tarea 12: ActClase: Estándar IEEE 29148 y 830 (Sprint 2)\n",
+                "INSERT INTO TODOUSER.TAREA (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'ActClase: Estándar IEEE 29148 y 830', TO_DATE('2024-02-21', 'YYYY-MM-DD'), 2, 4, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.USUARIOS WHERE Nombre = 'Diego Reyna')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.PROYECTO WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.SPRINT WHERE idSprint = 5 + 12));\n",
+                "\n",
+                "-- Tarea 13: M4 | Actividad en clase: Modelando al usuario (Sprint 3)\n",
+                "INSERT INTO TODOUSER.TAREA (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'M4 | Actividad en clase: Modelando al usuario', TO_DATE('2024-02-24', 'YYYY-MM-DD'), 2, 3, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.USUARIOS WHERE Nombre = 'Diego Reyna')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.PROYECTO WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.SPRINT WHERE idSprint = 5 + 13));\n",
+                "\n",
+                "-- Tarea 14: Actividad 2 - Calidad (Sprint 3)\n",
+                "INSERT INTO TODOUSER.TAREA (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Actividad 2 - Calidad', TO_DATE('2024-02-25', 'YYYY-MM-DD'), 2, 2, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.USUARIOS WHERE Nombre = 'Diego Reyna')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.PROYECTO WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.SPRINT WHERE idSprint = 5 + 13));"
+            ]
+        },
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "#### 3. **Tareas Hugo Peres**"
+            ]
+        },
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "| Fecha | Actividad | Tipo |\n",
+                "|-------|-----------|------|\n",
+                "| 2024-02-14 | Actividad de clase: Demanda | Actividad-clase |\n",
+                "| 2024-02-17 | M4 \\| Tarea: Obtención de la Información | Entregables-proyecto |\n",
+                "| 2024-02-17 | OCI Development Environment | Actividad-clase |\n",
+                "| 2024-02-17 | Práctica Linux 1 | Actividad-clase |\n",
+                "| 2024-02-18 | M3 \\| Actividad de aprendizaje: Metodología a utilizar | Actividad-clase |\n",
+                "| 2024-02-20 | Cursos de capacitación: OCI Foundations Associate Certification | Entregables-proyecto |\n",
+                "| 2024-02-20 | Cursos de capacitación: Cloud Native Applications | Entregables-proyecto |\n",
+                "| 2024-02-21 | Actividad 1 - Calidad | Actividad-clase |\n",
+                "| 2024-02-21 | ActClase: Estándar IEEE 29148 y 830 | Actividad-clase |\n",
+                "| 2024-02-24 | M3 \\| Tarea: EDT/WBS del Proyecto | Actividad-clase |\n",
+                "| 2024-02-24 | M4 \\| Tarea: Historias de Usuario | Actividad-clase |\n",
+                "| 2024-02-24 | Desplegar proyecto de RETO en sus ambientes locales + Docker + ATP + Container Registry | Despliegue-proyecto |\n",
+                "| 2024-02-25 | Actividad 2 - Calidad | Actividad-clase |\n",
+                "| 2024-02-25 | M3 \\| Actividad en clase: Creación de Backlog y su priorización | Actividad-clase |\n",
+                "| 2024-02-28 | Actividad: Mapas mentales de preparación sobre estándares de Ingeniería de Software | Actividad-clase |"
+            ]
+        },
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "##### Script"
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": null,
+            "metadata": {},
+            "outputs": [],
+            "source": [
+                "-- Tarea 1: Actividad de clase: Demanda (Sprint 1)\n",
+                "INSERT INTO TODOUSER.TAREA (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Actividad de clase: Demanda', TO_DATE('2024-02-14', 'YYYY-MM-DD'), 2, 3, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.USUARIOS WHERE Nombre = 'Hugo Peres')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.PROYECTO WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.SPRINT WHERE idSprint = 5 + 11));\n",
+                "\n",
+                "-- Tarea 2: M4 | Tarea: Obtención de la Información (Sprint 2)\n",
+                "INSERT INTO TODOUSER.TAREA (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'M4 | Tarea: Obtención de la Información', TO_DATE('2024-02-17', 'YYYY-MM-DD'), 2, 4, 1, 'Completado', 'Entregables-proyecto',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.USUARIOS WHERE Nombre = 'Hugo Peres')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.PROYECTO WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.SPRINT WHERE idSprint = 5 + 12));\n",
+                "\n",
+                "-- Tarea 3: OCI Development Environment (Sprint 2)\n",
+                "INSERT INTO TODOUSER.TAREA (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'OCI Development Environment', TO_DATE('2024-02-17', 'YYYY-MM-DD'), 2, 3, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.USUARIOS WHERE Nombre = 'Hugo Peres')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.PROYECTO WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.SPRINT WHERE idSprint = 5 + 12));\n",
+                "\n",
+                "-- Tarea 4: Práctica Linux 1 (Sprint 2)\n",
+                "INSERT INTO TODOUSER.TAREA (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Práctica Linux 1', TO_DATE('2024-02-17', 'YYYY-MM-DD'), 2, 2, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.USUARIOS WHERE Nombre = 'Hugo Peres')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.PROYECTO WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.SPRINT WHERE idSprint = 5 + 12));\n",
+                "\n",
+                "-- Tarea 5: M3 | Actividad de aprendizaje: Metodología a utilizar (Sprint 2)\n",
+                "INSERT INTO TODOUSER.TAREA (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'M3 | Actividad de aprendizaje: Metodología a utilizar', TO_DATE('2024-02-18', 'YYYY-MM-DD'), 2, 3, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.USUARIOS WHERE Nombre = 'Hugo Peres')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.PROYECTO WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.SPRINT WHERE idSprint = 5 + 12));\n",
+                "\n",
+                "-- Tarea 6: Cursos de capacitación: OCI Foundations Associate Certification (Sprint 2)\n",
+                "INSERT INTO TODOUSER.TAREA (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Cursos de capacitación: OCI Foundations Associate Certification', TO_DATE('2024-02-20', 'YYYY-MM-DD'), 2, 4, 1, 'Completado', 'Entregables-proyecto',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.USUARIOS WHERE Nombre = 'Hugo Peres')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.PROYECTO WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.SPRINT WHERE idSprint = 5 + 12));\n",
+                "\n",
+                "-- Tarea 7: Cursos de capacitación: Cloud Native Applications (Sprint 2)\n",
+                "INSERT INTO TODOUSER.TAREA (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Cursos de capacitación: Cloud Native Applications', TO_DATE('2024-02-20', 'YYYY-MM-DD'), 2, 3, 1, 'Completado', 'Entregables-proyecto',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.USUARIOS WHERE Nombre = 'Hugo Peres')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.PROYECTO WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.SPRINT WHERE idSprint = 5 + 12));\n",
+                "\n",
+                "-- Tarea 8: Actividad 1 - Calidad (Sprint 2)\n",
+                "INSERT INTO TODOUSER.TAREA (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Actividad 1 - Calidad', TO_DATE('2024-02-21', 'YYYY-MM-DD'), 2, 2, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.USUARIOS WHERE Nombre = 'Hugo Peres')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.PROYECTO WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.SPRINT WHERE idSprint = 5 + 12));\n",
+                "\n",
+                "-- Tarea 9: ActClase: Estándar IEEE 29148 y 830 (Sprint 2)\n",
+                "INSERT INTO TODOUSER.TAREA (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'ActClase: Estándar IEEE 29148 y 830', TO_DATE('2024-02-21', 'YYYY-MM-DD'), 2, 4, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.USUARIOS WHERE Nombre = 'Hugo Peres')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.PROYECTO WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.SPRINT WHERE idSprint = 5 + 12));\n",
+                "\n",
+                "-- Tarea 10: M3 | Tarea: EDT/WBS del Proyecto (Sprint 3)\n",
+                "INSERT INTO TODOUSER.TAREA (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'M3 | Tarea: EDT/WBS del Proyecto', TO_DATE('2024-02-24', 'YYYY-MM-DD'), 2, 3, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.USUARIOS WHERE Nombre = 'Hugo Peres')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.PROYECTO WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.SPRINT WHERE idSprint = 5 + 13));\n",
+                "\n",
+                "-- Tarea 11: M4 | Tarea: Historias de Usuario (Sprint 3)\n",
+                "INSERT INTO TODOUSER.TAREA (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'M4 | Tarea: Historias de Usuario', TO_DATE('2024-02-24', 'YYYY-MM-DD'), 2, 4, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.USUARIOS WHERE Nombre = 'Hugo Peres')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.PROYECTO WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.SPRINT WHERE idSprint = 5 + 13));\n",
+                "\n",
+                "-- Tarea 12: Desplegar proyecto de RETO en sus ambientes locales + Docker + ATP + Container Registry (Sprint 3)\n",
+                "INSERT INTO TODOUSER.TAREA (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Desplegar proyecto de RETO en sus ambientes locales + Docker + ATP + Container Registry', TO_DATE('2024-02-24', 'YYYY-MM-DD'), 4, 6, 1, 'Completado', 'Despliegue-proyecto',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.USUARIOS WHERE Nombre = 'Hugo Peres')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.PROYECTO WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.SPRINT WHERE idSprint = 5 + 13));\n",
+                "\n",
+                "-- Tarea 13: Actividad 2 - Calidad (Sprint 3)\n",
+                "INSERT INTO TODOUSER.TAREA (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Actividad 2 - Calidad', TO_DATE('2024-02-25', 'YYYY-MM-DD'), 2, 3, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.USUARIOS WHERE Nombre = 'Hugo Peres')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.PROYECTO WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.SPRINT WHERE idSprint = 5 + 13));\n",
+                "\n",
+                "-- Tarea 14: M3 | Actividad en clase: Creación de Backlog y su priorización (Sprint 3)\n",
+                "INSERT INTO TODOUSER.TAREA (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'M3 | Actividad en clase: Creación de Backlog y su priorización', TO_DATE('2024-02-25', 'YYYY-MM-DD'), 2, 4, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.USUARIOS WHERE Nombre = 'Hugo Peres')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.PROYECTO WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.SPRINT WHERE idSprint = 5 + 13));\n",
+                "\n",
+                "-- Tarea 15: Actividad: Mapas mentales de preparación sobre estándares de Ingeniería de Software (Sprint 3)\n",
+                "INSERT INTO TODOUSER.TAREA (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Actividad: Mapas mentales de preparación sobre estándares de Ingeniería de Software', TO_DATE('2024-02-28', 'YYYY-MM-DD'), 2, 3, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.USUARIOS WHERE Nombre = 'Hugo Peres')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.PROYECTO WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.SPRINT WHERE idSprint = 5 + 13));"
+            ]
+        },
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "#### 4. **Julio Madrigal**\n"
+            ]
+        },
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "| Fecha | Actividad | Tipo |\n",
+                "|-------|-----------|------|\n",
+                "| 2024-02-17 | M4 \\| Tarea: Obtención de la Información | Entregables-proyecto |\n",
+                "| 2024-02-17 | OCI Development Environment | Actividad-clase |\n",
+                "| 2024-02-17 | Práctica Linux 1 | Actividad-clase |\n",
+                "| 2024-02-18 | M3 \\| Actividad de aprendizaje: Metodología a utilizar | Actividad-clase |\n",
+                "| 2024-02-20 | Cursos de capacitación: OCI Foundations Associate Certification | Entregables-proyecto |\n",
+                "| 2024-02-20 | Cursos de capacitación: Cloud Native Applications | Entregables-proyecto |\n",
+                "| 2024-02-21 | Actividad 1 - Calidad | Actividad-clase |\n",
+                "| 2024-02-21 | ActClase: Estándar IEEE 29148 y 830 | Actividad-clase |\n",
+                "| 2024-02-24 | M4 \\| Tarea: Historias de Usuario | Actividad-clase |\n",
+                "| 2024-02-25 | Actividad 2 - Calidad | Actividad-clase |\n",
+                "| 2024-02-28 | Actividad: Mapas mentales de preparación sobre estándares de Ingeniería de Software | Actividad-clase |"
+            ]
+        },
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "##### Script"
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": null,
+            "metadata": {},
+            "outputs": [],
+            "source": [
+                "-- Tarea 2: M3 | Actividad de Aprendizaje:!Tendremos Boda! (Sprint 1)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'M3 | Actividad de Aprendizaje:!Tendremos Boda!', TO_DATE('2024-02-13', 'YYYY-MM-DD'), 2, 2, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Julio Madrigal')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 5 +11));\n",
+                "\n",
+                "-- Tarea 2: M4 | Tarea: Obtención de la Información (Sprint 2)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'M4 | Tarea: Obtención de la Información', TO_DATE('2024-02-17', 'YYYY-MM-DD'), 2, 4, 1, 'Completado', 'Entregables-proyecto',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Julio Madrigal')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 5 +12));\n",
+                "\n",
+                "-- Tarea 3: OCI Development Environment (Sprint 2)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'OCI Development Environment', TO_DATE('2024-02-17', 'YYYY-MM-DD'), 2, 3, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Julio Madrigal')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 5 +12));\n",
+                "\n",
+                "-- Tarea 4: Práctica Linux 1 (Sprint 2)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Práctica Linux 1', TO_DATE('2024-02-17', 'YYYY-MM-DD'), 2, 2, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Julio Madrigal')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 5 +12));\n",
+                "\n",
+                "-- Tarea 5: M3 | Actividad de aprendizaje: Metodología a utilizar (Sprint 2)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'M3 | Actividad de aprendizaje: Metodología a utilizar', TO_DATE('2024-02-18', 'YYYY-MM-DD'), 2, 3, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Julio Madrigal')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 5 +12));\n",
+                "\n",
+                "-- Tarea 6: Cursos de capacitación: OCI Foundations Associate Certification (Sprint 2)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Cursos de capacitación: OCI Foundations Associate Certification', TO_DATE('2024-02-20', 'YYYY-MM-DD'), 2, 4, 1, 'Completado', 'Entregables-proyecto',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Julio Madrigal')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 5 +12));\n",
+                "\n",
+                "-- Tarea 7: Cursos de capacitación: Cloud Native Applications (Sprint 2)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Cursos de capacitación: Cloud Native Applications', TO_DATE('2024-02-20', 'YYYY-MM-DD'), 2, 3, 1, 'Completado', 'Entregables-proyecto',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Julio Madrigal')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 5 +12));\n",
+                "\n",
+                "-- Tarea 8: Actividad 1 - Calidad (Sprint 2)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Actividad 1 - Calidad', TO_DATE('2024-02-21', 'YYYY-MM-DD'), 2, 2, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Julio Madrigal')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 5 +12));\n",
+                "\n",
+                "-- Tarea 9: ActClase: Estándar IEEE 29148 y 830 (Sprint 2)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'ActClase: Estándar IEEE 29148 y 830', TO_DATE('2024-02-21', 'YYYY-MM-DD'), 2, 4, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Julio Madrigal')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 5 +12));\n",
+                "\n",
+                "-- Tarea 11: M4 | Tarea: Historias de Usuario (Sprint 3)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'M4 | Tarea: Historias de Usuario', TO_DATE('2024-02-24', 'YYYY-MM-DD'), 2, 4, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Julio Madrigal')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 5 +13));\n",
+                "\n",
+                "-- Tarea 13: Actividad 2 - Calidad (Sprint 3)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Actividad 2 - Calidad', TO_DATE('2024-02-25', 'YYYY-MM-DD'), 2, 3, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Julio Madrigal')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 5 +13));\n",
+                "\n",
+                "-- Tarea 13: M4 | Actividad en clase: Modelando al usuario (Sprint 3)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'M4 | Actividad en clase: Modelando al usuario', TO_DATE('2024-02-24', 'YYYY-MM-DD'), 2, 3, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Julio Madrigal')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 5 +13));\n",
+                "\n",
+                "-- Tarea 15: Actividad: Mapas mentales de preparación sobre estándares de Ingeniería de Software (Sprint 3)\n",
+                "INSERT INTO TODOUSER.Tarea (idTarea, Descripcion, FechaEntrega, Horas_Estimadas, Horas_Reales, Activo, Estado, Categoria, idDesarrollador, idProyecto, idSprint)\n",
+                "VALUES (TODOUSER.Tarea_seq.NEXTVAL, 'Actividad: Mapas mentales de preparación sobre estándares de Ingeniería de Software', TO_DATE('2024-02-28', 'YYYY-MM-DD'), 2, 3, 1, 'Completado', 'Actividad-clase',\n",
+                "        (SELECT idDesarrollador FROM TODOUSER.DESARROLLADOR WHERE idUsuario = (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Julio Madrigal')),\n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT'),\n",
+                "        (SELECT idSprint FROM TODOUSER.Sprint WHERE idSprint = 5 +13));"
+            ]
+        },
+        {
+            "attachments": {},
+            "cell_type": "markdown",
+            "metadata": {
+                "azdata_cell_guid": "68252c30-999a-4fcf-95b0-5467e0e5c606",
+                "language": "sql"
+            },
+            "source": [
+                "## **Registro de Relaciones en Base de datos**\n",
+                "\n",
+                "A continuacino se muestran todas las relaciones de la base de datos"
+            ]
+        },
+        {
+            "attachments": {},
+            "cell_type": "markdown",
+            "metadata": {
+                "azdata_cell_guid": "71b5fb5f-d0f6-4951-8d70-d39bd87e057e",
+                "language": "sql"
+            },
+            "source": [
+                "### **Registros en Equipo\\_Proyecto**"
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": null,
+            "metadata": {
+                "azdata_cell_guid": "88cc1a11-bf9c-41c3-8db5-0dc94d0b77b2",
+                "language": "sql",
+                "tags": [
+                    "hide_input"
+                ]
+            },
+            "outputs": [],
+            "source": [
+                "-- Registrar relacion Equipo proyecto\n",
+                "\n",
+                "INSERT INTO TODOUSER.Equipo_Proyecto (idEquipo_Proyecto, idEquipo, idProyecto, Activo) \n",
+                "VALUES (TODOUSER.Equipo_Proyecto_seq.NEXTVAL, \n",
+                "        (SELECT idEquipo FROM TODOUSER.Equipo WHERE Nombre = 'KoalAndroid'), \n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaDEX' AND ACTIVO = 1), 1);\n",
+                "\n",
+                "INSERT INTO TODOUSER.Equipo_Proyecto (idEquipo_Proyecto, idEquipo, idProyecto, Activo) \n",
+                "VALUES (TODOUSER.Equipo_Proyecto_seq.NEXTVAL, \n",
+                "        (SELECT idEquipo FROM TODOUSER.Equipo WHERE Nombre = 'Koalas'), \n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaventurasAWAQ' AND ACTIVO = 1), 1);\n",
+                "\n",
+                "INSERT INTO TODOUSER.Equipo_Proyecto (idEquipo_Proyecto, idEquipo, idProyecto, Activo) \n",
+                "VALUES (TODOUSER.Equipo_Proyecto_seq.NEXTVAL, \n",
+                "        (SELECT idEquipo FROM TODOUSER.Equipo WHERE Nombre = 'KoalaBOT'), \n",
+                "        (SELECT idProyecto FROM TODOUSER.Proyecto WHERE Nombre = 'KoalaBOT' AND ACTIVO = 1), 1);"
+            ]
+        },
+        {
+            "attachments": {},
+            "cell_type": "markdown",
+            "metadata": {
+                "azdata_cell_guid": "d7b4dd5f-e8f8-4848-902e-d2954fd5827b",
+                "language": "sql"
+            },
+            "source": [
+                "### **Registros en Usuario\\_Equipo**"
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": null,
+            "metadata": {
+                "azdata_cell_guid": "0d3bd622-2b05-4d6a-bf90-da4c85af3fd0",
+                "language": "sql",
+                "tags": [
+                    "hide_input"
+                ]
+            },
+            "outputs": [],
+            "source": [
+                "\n",
+                "-- Equipo Koalas\n",
+                "INSERT INTO TODOUSER.Usuario_Equipo (idUsuario_equipo, idUsuario, idEquipo, Rol, Activo) \n",
+                "VALUES (TODOUSER.Usuario_Equipo_seq.NEXTVAL, \n",
+                "        (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Victor Escalante'), \n",
+                "        (SELECT idEquipo FROM TODOUSER.Equipo WHERE Nombre = 'Koalas'), 'Desarrollador', 1);\n",
+                "\n",
+                "INSERT INTO TODOUSER.Usuario_Equipo (idUsuario_equipo, idUsuario, idEquipo, Rol, Activo) \n",
+                "VALUES (TODOUSER.Usuario_Equipo_seq.NEXTVAL, \n",
+                "        (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Hugo Peres'), \n",
+                "        (SELECT idEquipo FROM TODOUSER.Equipo WHERE Nombre = 'Koalas'), 'Desarrollador', 1);\n",
+                "\n",
+                "INSERT INTO TODOUSER.Usuario_Equipo (idUsuario_equipo, idUsuario, idEquipo, Rol, Activo) \n",
+                "VALUES (TODOUSER.Usuario_Equipo_seq.NEXTVAL, \n",
+                "        (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Martha Galindo'), \n",
+                "        (SELECT idEquipo FROM TODOUSER.Equipo WHERE Nombre = 'Koalas'), 'Administrador', 1);\n",
+                "\n",
+                "-- Equipo KoalAndroid\n",
+                "INSERT INTO TODOUSER.Usuario_Equipo (idUsuario_equipo, idUsuario, idEquipo, Rol, Activo) \n",
+                "VALUES (TODOUSER.Usuario_Equipo_seq.NEXTVAL, \n",
+                "        (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Victor Escalante'), \n",
+                "        (SELECT idEquipo FROM TODOUSER.Equipo WHERE Nombre = 'KoalAndroid'), 'Desarrollador', 1);\n",
+                "\n",
+                "INSERT INTO TODOUSER.Usuario_Equipo (idUsuario_equipo, idUsuario, idEquipo, Rol, Activo) \n",
+                "VALUES (TODOUSER.Usuario_Equipo_seq.NEXTVAL, \n",
+                "        (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Hugo Peres'), \n",
+                "        (SELECT idEquipo FROM TODOUSER.Equipo WHERE Nombre = 'KoalAndroid'), 'Desarrollador', 1);\n",
+                "\n",
+                "INSERT INTO TODOUSER.Usuario_Equipo (idUsuario_equipo, idUsuario, idEquipo, Rol, Activo) \n",
+                "VALUES (TODOUSER.Usuario_Equipo_seq.NEXTVAL, \n",
+                "        (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Sergio Flores'), \n",
+                "        (SELECT idEquipo FROM TODOUSER.Equipo WHERE Nombre = 'KoalAndroid'), 'Administrador', 1);\n",
+                "\n",
+                "-- Equipo KoalAPEX\n",
+                "INSERT INTO TODOUSER.Usuario_Equipo (idUsuario_equipo, idUsuario, idEquipo, Rol, Activo) \n",
+                "VALUES (TODOUSER.Usuario_Equipo_seq.NEXTVAL, \n",
+                "        (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Victor Escalante'), \n",
+                "        (SELECT idEquipo FROM TODOUSER.Equipo WHERE Nombre = 'KoalAPEX'), 'Desarrollador', 1);\n",
+                "\n",
+                "INSERT INTO TODOUSER.Usuario_Equipo (idUsuario_equipo, idUsuario, idEquipo, Rol, Activo) \n",
+                "VALUES (TODOUSER.Usuario_Equipo_seq.NEXTVAL, \n",
+                "        (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Hugo Peres'), \n",
+                "        (SELECT idEquipo FROM TODOUSER.Equipo WHERE Nombre = 'KoalAPEX'), 'Desarrollador', 1);\n",
+                "\n",
+                "INSERT INTO TODOUSER.Usuario_Equipo (idUsuario_equipo, idUsuario, idEquipo, Rol, Activo) \n",
+                "VALUES (TODOUSER.Usuario_Equipo_seq.NEXTVAL, \n",
+                "        (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Diego Reyna'), \n",
+                "        (SELECT idEquipo FROM TODOUSER.Equipo WHERE Nombre = 'KoalAPEX'), 'Desarrollador', 1);\n",
+                "\n",
+                "INSERT INTO TODOUSER.Usuario_Equipo (idUsuario_equipo, idUsuario, idEquipo, Rol, Activo) \n",
+                "VALUES (TODOUSER.Usuario_Equipo_seq.NEXTVAL, \n",
+                "        (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Julio Madrigal'), \n",
+                "        (SELECT idEquipo FROM TODOUSER.Equipo WHERE Nombre = 'KoalAPEX'), 'Desarrollador', 1);\n",
+                "\n",
+                "INSERT INTO TODOUSER.Usuario_Equipo (idUsuario_equipo, idUsuario, idEquipo, Rol, Activo) \n",
+                "VALUES (TODOUSER.Usuario_Equipo_seq.NEXTVAL, \n",
+                "        (SELECT idUsuario FROM TODOUSER.Usuarios WHERE Nombre = 'Adan Ruiz'), \n",
+                "        (SELECT idEquipo FROM TODOUSER.Equipo WHERE Nombre = 'KoalAPEX'), 'Administrador', 1);"
+            ]
+        },
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "## **Triggers y condicionales adicionales para la integridad de los datos**"
+            ]
+        },
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "A continuacion se muestran los *Disparadores* que se han utilizado para mantener la integridad de los datos en nuestro proyecto."
+            ]
+        },
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "### **Talbla de historial de cambios en talba de tareas**"
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": null,
+            "metadata": {},
+            "outputs": [],
+            "source": [
+                "CREATE TABLE TODOUSER.HISTORIAL_ESTADO_TAREA (\n",
+                "    ID_HISTORIAL NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,\n",
+                "    IDTAREA NUMBER,\n",
+                "    IDUSUARIO NUMBER,\n",
+                "    ESTADO_ANTERIOR VARCHAR2(100),\n",
+                "    ESTADO_NUEVO VARCHAR2(100),\n",
+                "    FECHA_CAMBIO TIMESTAMP DEFAULT SYSTIMESTAMP,\n",
+                "    ACTIVO NUMBER(1) DEFAULT 1 CHECK (ACTIVO IN (0,1))\n",
+                ");\n",
+                "\n",
+                "-- Secuencia de Auto Incremento \n",
+                "CREATE SEQUENCE TODOUSER.Historial_seq START WITH 1 INCREMENT BY 1;\n",
+                "\n",
+                "-- Trigger para auto incremento de idHistorial\n",
+                "CREATE OR REPLACE TRIGGER TODOUSER.Historial_trg\n",
+                "BEFORE INSERT ON TODOUSER.HISTORIAL_ESTADO_TAREA\n",
+                "FOR EACH ROW\n",
+                "BEGIN\n",
+                "    IF :NEW.id_Historial IS NULL THEN\n",
+                "        SELECT Historial_seq.NEXTVAL INTO :NEW.id_Historial FROM DUAL;\n",
+                "    END IF;\n",
+                "END;\n",
+                "\n",
+                "\n",
+                "-- Trigger para registrar cambios en el estado de las tareas\n",
+                "CREATE OR REPLACE EDITIONABLE TRIGGER trg_historial_estado\n",
+                "AFTER UPDATE ON TODOUSER.TAREA\n",
+                "FOR EACH ROW\n",
+                "BEGIN\n",
+                "  IF (:OLD.ESTADO IS NULL OR :NEW.ESTADO IS NULL) THEN\n",
+                "    IF (:OLD.ESTADO IS NOT NULL OR :NEW.ESTADO IS NOT NULL) THEN\n",
+                "      -- One is NULL and the other is not – there is a change.\n",
+                "      INSERT INTO TODOUSER.HISTORIAL_ESTADO_TAREA (\n",
+                "        IDTAREA,\n",
+                "        IDUSUARIO,\n",
+                "        ESTADO_ANTERIOR,\n",
+                "        ESTADO_NUEVO,\n",
+                "        FECHA_CAMBIO,\n",
+                "        ACTIVO\n",
+                "      )\n",
+                "      VALUES (\n",
+                "        :NEW.IDTAREA,\n",
+                "        SYS_CONTEXT('KOALAPEX_CTX', 'IDUSUARIO'),\n",
+                "        :OLD.ESTADO,\n",
+                "        :NEW.ESTADO,\n",
+                "        SYSTIMESTAMP,\n",
+                "        1\n",
+                "      );\n",
+                "    END IF;\n",
+                "  ELSIF :OLD.ESTADO <> :NEW.ESTADO THEN\n",
+                "    -- Both are not NULL and are different.\n",
+                "    INSERT INTO TODOUSER.HISTORIAL_ESTADO_TAREA (\n",
+                "      IDTAREA,\n",
+                "      IDUSUARIO,\n",
+                "      ESTADO_ANTERIOR,\n",
+                "      ESTADO_NUEVO,\n",
+                "      FECHA_CAMBIO,\n",
+                "      ACTIVO\n",
+                "    )\n",
+                "    VALUES (\n",
+                "      :NEW.IDTAREA,\n",
+                "      SYS_CONTEXT('KOALAPEX_CTX', 'IDUSUARIO'),\n",
+                "      :OLD.ESTADO,\n",
+                "      :NEW.ESTADO,\n",
+                "      SYSTIMESTAMP,\n",
+                "      1\n",
+                "    );\n",
+                "  END IF;\n",
+                "END;\n",
+                "/\n",
+                "ALTER TRIGGER trg_historial_estado ENABLE;\n",
+                "\n",
+                "\n",
+                "-- Trigger para insertar en Historial_Estado_Tarea al insertar una nueva tarea\n",
+                "CREATE OR REPLACE TRIGGER trg_historial_tarea_insert\n",
+                "AFTER INSERT ON TODOUSER.TAREA\n",
+                "FOR EACH ROW\n",
+                "BEGIN\n",
+                "  INSERT INTO TODOUSER.HISTORIAL_ESTADO_TAREA (\n",
+                "    IDTAREA,\n",
+                "    IDUSUARIO,\n",
+                "    ESTADO_ANTERIOR,\n",
+                "    ESTADO_NUEVO,\n",
+                "    FECHA_CAMBIO,\n",
+                "    ACTIVO\n",
+                "  )\n",
+                "  VALUES (\n",
+                "    :NEW.IDTAREA,\n",
+                "    SYS_CONTEXT('KOALAPEX_CTX', 'IDUSUARIO'),  -- Get user ID from context\n",
+                "    NULL,            -- On insert, estado_anterior is null\n",
+                "    :NEW.ESTADO,\n",
+                "    SYSTIMESTAMP,\n",
+                "    1\n",
+                "  );\n",
+                "END;\n",
+                "/\n",
+                "ALTER TRIGGER trg_historial_tarea_insert ENABLE;\n",
+                "\n",
+                "\n",
+                "-- Trigger para insertar en Historial_Estado_Tarea al borrar una tarea\n",
+                "CREATE OR REPLACE TRIGGER trg_historial_tarea_delete\n",
+                "AFTER DELETE ON TODOUSER.TAREA\n",
+                "FOR EACH ROW\n",
+                "BEGIN\n",
+                "  INSERT INTO TODOUSER.HISTORIAL_ESTADO_TAREA (\n",
+                "    IDTAREA,\n",
+                "    IDUSUARIO,\n",
+                "    ESTADO_ANTERIOR,\n",
+                "    ESTADO_NUEVO,\n",
+                "    FECHA_CAMBIO,\n",
+                "    ACTIVO\n",
+                "  )\n",
+                "  VALUES (\n",
+                "    :OLD.IDTAREA,\n",
+                "    SYS_CONTEXT('KOALAPEX_CTX', 'IDUSUARIO'),\n",
+                "    :OLD.ESTADO,    -- For delete, use the old state in estado_anterior\n",
+                "    NULL,          -- estado_nuevo is null when the record is deleted\n",
+                "    SYSTIMESTAMP,\n",
+                "    1\n",
+                "  );\n",
+                "END;\n",
+                "/\n",
+                "ALTER TRIGGER trg_historial_tarea_delete ENABLE;\n",
+                "\n",
+                "\n"
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": null,
+            "metadata": {},
+            "outputs": [],
+            "source": [
+                "CREATE TABLE USUARIO_HISTORIAL(\n",
+                "    IDUSUARIO_HISTORIAL NUMBER PRIMARY KEY,\n",
+                "    IDUSUARIO NUMBER,\n",
+                "    ID_HISTORIAL NUMBER,\n",
+                "    LEIDA NUMBER(1) DEFAULT 0 CHECK (LEIDA IN (0,1)),\n",
+                "    ACTIVO NUMBER(1) DEFAULT 1 CHECK (ACTIVO IN (0,1))\n",
+                ")\n",
+                "\n",
+                "-- Secuencia de Auto Incremento\n",
+                "CREATE SEQUENCE TODOUSER.Usuario_Historial_seq START WITH 1 INCREMENT BY 1;\n",
+                "\n",
+                "-- Trigger para auto incremento de idUsuario_Historial\n",
+                "CREATE OR REPLACE TRIGGER TODOUSER.Usuario_Historial_trg\n",
+                "BEFORE INSERT ON TODOUSER.USUARIO_HISTORIAL\n",
+                "FOR EACH ROW\n",
+                "BEGIN\n",
+                "    IF :NEW.idUsuario_Historial IS NULL THEN\n",
+                "        SELECT Usuario_Historial_seq.NEXTVAL INTO :NEW.idUsuario_Historial FROM DUAL;\n",
+                "    END IF;\n",
+                "END;\n",
+                "\n",
+                "\n",
+                "-- Trigger para insertar en Usuario_Historial tras insertar en Historial_Estado_Tarea\n",
+                "CREATE OR REPLACE TRIGGER compound_trg_historial_after_insert\n",
+                "FOR INSERT ON HISTORIAL_ESTADO_TAREA\n",
+                "COMPOUND TRIGGER\n",
+                "\n",
+                "  -- Colección para guardar ID_HISTORIAL de múltiples filas\n",
+                "  TYPE t_history_ids IS TABLE OF HISTORIAL_ESTADO_TAREA.ID_HISTORIAL%TYPE;\n",
+                "  v_history_ids t_history_ids := t_history_ids();\n",
+                "\n",
+                "  BEFORE EACH ROW IS\n",
+                "  BEGIN\n",
+                "    v_history_ids.EXTEND;\n",
+                "    v_history_ids(v_history_ids.LAST) := :NEW.ID_HISTORIAL;\n",
+                "  END BEFORE EACH ROW;\n",
+                "\n",
+                "  AFTER STATEMENT IS\n",
+                "  BEGIN\n",
+                "    -- Por cada ID_HISTORIAL nuevo, añade un registro USUARIO_HISTORIAL para cada usuario.\n",
+                "    FOR i IN 1 .. v_history_ids.COUNT LOOP\n",
+                "      INSERT INTO USUARIO_HISTORIAL (IDUSUARIO, ID_HISTORIAL)\n",
+                "      SELECT IDUSUARIO, v_history_ids(i)\n",
+                "      FROM USUARIOS;\n",
+                "    END LOOP;\n",
+                "  END AFTER STATEMENT;\n",
+                "\n",
+                "END compound_trg_historial_after_insert;\n",
+                "/\n"
+            ]
+        }
+    ],
+    "metadata": {
+        "kernelspec": {
+            "display_name": "SQL",
+            "language": "sql",
+            "name": "SQL"
+        },
+        "language_info": {
+            "name": "sql",
+            "version": ""
+        }
+    },
+    "nbformat": 4,
+    "nbformat_minor": 2
+}
