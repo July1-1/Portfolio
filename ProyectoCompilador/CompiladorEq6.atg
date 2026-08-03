@@ -1,0 +1,149 @@
+COMPILER CompiladorEq6
+  
+  public SymbolTable tabla;
+  public CodeGen     code;
+
+CHARACTERS
+  letra    = 'a'..'z' + 'A'..'Z' .
+  digito   = '0'..'9' .
+  cualqcar = ANY - '"' - '\r' - '\n' .
+
+TOKENS
+  ident    = letra { letra | digito | '_' } .
+  entero   = digito { digito } .
+  flotante = digito { digito } '.' digito { digito } .
+  cadena   = '"' { cualqcar } '"' .
+
+IGNORE ' ' + '\t' + '\r' + '\n'
+
+PRODUCTIONS
+
+  CompiladorEq6 =
+    "program" ident "{"
+      V
+    "begin" ";"
+      S
+    "end" ";" "}" .
+
+  V = { "var"
+        (. string tipo = ""; List<string> nombres = new List<string>(); .)
+        ident              (. nombres.Add(t.val); .)
+        { "," ident        (. nombres.Add(t.val); .) }
+        ":" tipoDato       (. tipo = t.val; .)
+                           (. foreach(var n in nombres) tabla.Declare(n, tipo); .)
+        ";"
+      } .
+
+  tipoDato = "int" | "float" | "bool" | "string" .
+
+  S = { E } .
+
+  E = ASGNINC | W | I | WH | F .
+
+  ASGNINC =
+    ident              (. string nombre = t.val; tabla.Check(nombre); .)
+    ( ":=" EX          (. code.FinExpresion(); code.Assign(nombre); .)
+    | "++"             (. code.PushOperando(nombre, tabla.GetType(nombre));
+                          code.PushOperando("1", "int");
+                          code.PushSumaOr("+");
+                          code.FinExpresion();
+                          code.Assign(nombre); .)
+    | "--"             (. code.PushOperando(nombre, tabla.GetType(nombre));
+                          code.PushOperando("1", "int");
+                          code.PushSumaOr("-");
+                          code.FinExpresion();
+                          code.Assign(nombre); .)
+    )
+    ";" .
+
+  W =
+    "write" "(" EX     (. code.FinExpresion(); code.Write(); .)
+    ")" ";" .
+
+  I =
+    "if" "(" EX        (. code.FinExpresion(); code.IfCondicion(); .)
+    ")" "then"
+    "{" S "}"
+    ( "else"           (. code.ElseInicio(); .)
+      "{" S "}"        (. code.ElseFin(); .)
+    |                  (. code.IfFin(); .)
+    ) .
+
+  WH =
+    "while"            (. code.WhileInicio(); .)
+    "(" EX             (. code.FinExpresion(); code.WhileCondicion(); .)
+    ")" "do"
+    "{" S "}"          (. code.WhileFin(); .)
+    .
+
+  F =
+    "for" "("
+      ident            (. string nombre = t.val; tabla.Check(nombre); .)
+      ":=" EX          (. code.FinExpresion(); code.Assign(nombre); .)
+    ";"                (. code.ForInicio(); .)
+      EX               (. code.FinExpresion(); code.ForCondicion(); .)
+    ";"                (. code.ForGuardaIncremento(); .)
+      INCF             (. code.ForFinIncremento(); .)
+    ")"
+    "{" S "}"          (. code.ForFin(); .)
+    .
+
+  INCF =
+    ident              (. string nombre = t.val; tabla.Check(nombre); .)
+    ( "++"             (. code.PushOperando(nombre, tabla.GetType(nombre));
+                          code.PushOperando("1", "int");
+                          code.PushSumaOr("+");
+                          code.FinExpresion();
+                          code.Assign(nombre); .)
+    | "--"             (. code.PushOperando(nombre, tabla.GetType(nombre));
+                          code.PushOperando("1", "int");
+                          code.PushSumaOr("-");
+                          code.FinExpresion();
+                          code.Assign(nombre); .)
+    ) .
+
+  EX =
+    ER
+    { ( "and"          (. code.PushMultAnd("and"); .)
+      | "or"           (. code.PushSumaOr("or");   .)
+      ) ER
+    } .
+
+  ER =
+    EA
+    [ ( "<"            (. code.PushRelacional("<");  .)
+      | ">"            (. code.PushRelacional(">");  .)
+      | "<="           (. code.PushRelacional("<="); .)
+      | ">="           (. code.PushRelacional(">="); .)
+      | "=="           (. code.PushRelacional("=="); .)
+      | "!="           (. code.PushRelacional("!="); .)
+      ) EA
+    ] .
+
+  EA =
+    TM
+    { ( "+"            (. code.PushSumaOr("+"); .)
+      | "-"            (. code.PushSumaOr("-"); .)
+      ) TM
+    } .
+
+  TM =
+    FC
+    { ( "*"            (. code.PushMultAnd("*"); .)
+      | "/"            (. code.PushMultAnd("/"); .)
+      ) FC
+    } .
+
+  FC =
+    ident              (. tabla.Check(t.val);
+                          string tipo = tabla.GetType(t.val);
+                          code.PushOperando(t.val, tipo);     .)
+  | entero             (. code.PushOperando(t.val, "int");    .)
+  | flotante           (. code.PushOperando(t.val, "float");  .)
+  | cadena             (. code.PushOperando(t.val, "string"); .)
+  | "("                (. code.PushFondoFalso(); .)
+      EX
+    ")"                (. code.PopFondoFalso();  .)
+  | "-" FC             (. code.PushSumaOr("NEG"); .) .
+
+END CompiladorEq6.
