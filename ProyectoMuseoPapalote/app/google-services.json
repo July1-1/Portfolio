@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "533288644562",
+    "firebase_url": "https://los-androidesv2-default-rtdb.firebaseio.com",
+    "project_id": "los-androidesv2",
+    "storage_bucket": "los-androidesv2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:533288644562:android:b9e6c05c009c34f884a20b",
+        "android_client_info": {
+          "package_name": "com.example.los_androidesv2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB8gkn7ew-xIWmnUMw0VgcgMEd7DdzLOmc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
